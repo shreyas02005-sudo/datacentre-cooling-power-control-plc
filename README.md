@@ -196,17 +196,6 @@ This is an academic design, not a certified safety system. Key gaps and planned 
 - Replace discrete temperature switches with analog inputs and hysteresis
 - Connect an HMI/SCADA layer for monitoring and alarm management
 
-## Team
-
-| Name | Role |
-|------|------|
-| Shreyas R | Team member |
-| M P Subbaiah | Team member |
-| Yashas B R | Team member |
-
-**Guide:** Dr. Nishi Shahnaj Haider, Professor, Department of Electronics and Instrumentation Engineering, Ramaiah Institute of Technology (Autonomous, affiliated to VTU), Bengaluru.
-
-Report date: May 2026.
 
 ## License
 
