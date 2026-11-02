@@ -1,28 +1,28 @@
 # Verification Scenarios
 
-Each scenario lists the inputs to force and the behaviour expected from the ladder logic. Use them to test in Logix Emulate or on hardware. Every output below also requires `CR` = ON unless stated.
+These are the scenarios we use to check the program. For each one, force the listed inputs (in Logix Emulate or on hardware) and compare the result with the expected behaviour. Unless a row says otherwise, `CR` needs to be on.
 
 | # | Scenario | Inputs | Expected behaviour |
 |---|----------|--------|--------------------|
-| 1 | Power-up, not started | none | All outputs OFF |
-| 2 | Start | Pulse `start` | `CR` latches, `cooling_fans` ON, stays ON after release |
-| 3 | Stop | Pulse `stop` | `CR` drops, all outputs OFF |
-| 4 | High temperature | `temp_high` ON | `secondary_cooling_fan` ON, `cooling_fans` stays ON |
-| 5 | Overheat | `temp_overheat` ON | `overheat` set, `AC_unit` ON, `overheat_light` ON |
-| 6a | Critical temp, transient | `critical_temp` ON for less than 5 s | Timer resets, no shutdown |
-| 6b | Critical temp, sustained | `critical_temp` ON for 5 s or more | `critical_shutdown` ON, `critical_light` ON, `mains` OFF |
-| 7a | Power flicker | `power_fail` ON for less than 5 s | No change, `mains` stays ON |
-| 7b | Power failure | `power_fail` ON for 5 s | `power_backup_mode` ON, `yellow_light` ON, `mains` OFF |
-| 7c | Generator online | `power_fail` ON for 10 s | `generator_ready`, `generator` and `generator_light` ON |
-| 8 | Mains restored | `power_fail` OFF | Backup mode drops, `mains` ON, generator OFF |
-| 9 | Critical shutdown during power failure | `critical_shutdown` ON, then `power_fail` ON | Backup timer and generator warm-up inhibited, `mains` OFF |
-| 10a | Smoke, brief | `smoke_detector` ON for less than 5 s | `smoke_alarm` ON, `power_relay` energised, no gas release |
-| 10b | Smoke, sustained | `smoke_detector` ON for 5 s or more | Gas suppression ON, powered loads (fans, AC, mains, generator) OFF |
-| 11 | Stop during fire | `smoke_detector` ON, then `stop` | `CR` drops, so alarm and suppression drop out (see design review) |
+| 1 | Power-up, not started | None | All outputs off |
+| 2 | Start | Pulse `start` | `CR` latches and `cooling_fans` turns on. It stays on after the button is released |
+| 3 | Stop | Pulse `stop` | `CR` drops and all outputs turn off |
+| 4 | High temperature | `temp_high` on | `secondary_cooling_fan` turns on, and `cooling_fans` stays on |
+| 5 | Overheat | `temp_overheat` on | `overheat` is set, and `AC_unit` and `overheat_light` turn on |
+| 6a | Critical temperature, brief | `critical_temp` on for under 5 s | The timer resets and nothing shuts down |
+| 6b | Critical temperature, sustained | `critical_temp` on for 5 s or more | `critical_shutdown` and `critical_light` turn on, and `mains` turns off |
+| 7a | Power flicker | `power_fail` on for under 5 s | No change, and `mains` stays on |
+| 7b | Power failure | `power_fail` on for 5 s | `power_backup_mode` and `yellow_light` turn on, and `mains` turns off |
+| 7c | Generator online | `power_fail` on for 10 s | `generator_ready`, `generator` and `generator_light` turn on |
+| 8 | Mains restored | `power_fail` off | Backup mode drops, `mains` turns on and the generator turns off |
+| 9 | Critical shutdown during a power failure | `critical_shutdown` on, then `power_fail` on | Backup timer and generator warm-up are blocked, and `mains` stays off |
+| 10a | Smoke, brief | `smoke_detector` on for under 5 s | `smoke_alarm` turns on and `power_relay` is energised, but no gas is released |
+| 10b | Smoke, sustained | `smoke_detector` on for 5 s or more | Gas suppression turns on, and powered loads (fans, AC, mains, generator) are off |
+| 11 | Stop during a fire | `smoke_detector` on, then `stop` | `CR` drops, so the alarm and suppression drop out too (see the design review) |
 
-## Scenario 10b: expected timeline
+## Scenario 10b timeline
 
-| Time | Event |
-|------|-------|
-| 0 s | `smoke_alarm` ON, `power_relay` energised, fans / AC / mains / generator OFF |
-| 5 s | `fire_suppression_del` done, `gas_based_fire_suppression` ON |
+| Time | What happens |
+|------|--------------|
+| 0 s | `smoke_alarm` turns on, `power_relay` is energised, and fans, AC, mains and generator turn off |
+| 5 s | `fire_suppression_del` finishes and `gas_based_fire_suppression` turns on |

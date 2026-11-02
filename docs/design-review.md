@@ -1,49 +1,49 @@
 # Design Review
 
-A critical review of the program: what it does well, where it falls short of a production system, and what to improve.
+An honest look at the program: what we think works well, where it falls short of a real system, and what we'd change next.
 
-## Strengths
+## What works well
 
-- Single master enable (`CR`) with a seal-in start/stop circuit
-- Timer-confirmed critical temperature, power failure and fire events
-- Interlocks prevent the backup sequence and generator during a critical shutdown
+- One master enable (`CR`) with a seal-in start/stop circuit
+- Critical temperature, power failure and fire all have to last 5 s before the system reacts
+- A critical shutdown blocks the backup sequence and the generator
 - Mains and generator never overlap (break-before-make)
-- Smoke response isolates powered loads before gas discharge
-- Clear, consistent tag naming and a layered structure
+- On smoke, powered loads are isolated before the gas is released
+- Consistent tag names and a layered structure that's easy to follow
 
-## Limitations
+## Where it falls short
 
-| # | Observation | Risk |
-|---|-------------|------|
-| 1 | `critical_shutdown`, `overheat` and `power_backup_mode` are non-latching (OTE) | A shutdown clears itself when the sensor input clears, so a transient reset can restore operation without operator review |
-| 2 | No manual reset or acknowledgement | Operator is not required to confirm the fault is resolved |
-| 3 | Fire protection is gated by `CR` | Pressing `stop` (or a stopped system) disables smoke alarm and suppression |
-| 4 | `stop` is examined as XIO | Correct only for a normally-open stop button. A fail-safe design would use a normally-closed button with XIC so that a broken wire also stops the system |
-| 5 | Roughly 5 s gap between mains dropping (t = 5 s) and generator closing (t = 10 s) | Loads are unpowered unless a UPS or battery bridges the gap |
-| 6 | Discrete temperature inputs, no hysteresis | Outputs can chatter around a threshold |
-| 7 | No sensor-fault detection | A failed or disconnected sensor reads as "normal" |
-| 8 | No watchdog or fault-state handling | A controller fault does not force a known safe state |
-| 9 | Standard (non-safety-rated) logic controls gas discharge | Not suitable for life-safety use without certified equipment |
+| # | What we noticed | Why it matters |
+|---|-----------------|----------------|
+| 1 | `critical_shutdown`, `overheat` and `power_backup_mode` are plain outputs, not latched | A shutdown clears itself as soon as the sensor input clears, so an operator never gets a chance to review it |
+| 2 | There's no manual reset or acknowledgement | Nobody has to confirm the fault is actually fixed |
+| 3 | Fire protection depends on `CR` | If the system is stopped, the smoke alarm and suppression are disabled too |
+| 4 | `stop` is examined as XIO | That only works with a normally open stop button. A fail-safe design would use a normally closed button with XIC, so a broken wire also stops the system |
+| 5 | About 5 s passes between mains dropping (t = 5 s) and the generator closing (t = 10 s) | Loads go unpowered unless a UPS or battery covers the gap |
+| 6 | Temperatures come from discrete inputs with no hysteresis | Outputs can chatter around a threshold |
+| 7 | There's no sensor-fault detection | A failed or disconnected sensor looks like "normal" |
+| 8 | There's no watchdog or fault-state handling | If the controller faults, nothing forces a known safe state |
+| 9 | Standard, non-safety-rated logic controls the gas release | Not suitable for life-safety use without certified equipment |
 
-## Recommended improvements
+## What we'd improve
 
-**High priority**
+**First**
 1. Latch `critical_shutdown` with `OTL` and clear it only with an operator reset input.
-2. Make the smoke / fire rungs independent of `CR`, so fire protection works even when the process is stopped.
+2. Make the smoke and fire rungs independent of `CR`, so fire protection still works when the process is stopped.
 3. Add a watchdog and a defined fail-safe output state.
 
-**Medium priority**
-4. Use analog temperature inputs with setpoints and hysteresis, and add sensor-fault alarms.
-5. Add a manual override and a suppression abort / hold input.
-6. Add a UPS or battery bridging stage, or overlap-managed transfer, to cover the transfer gap.
-7. Add a generator-feedback input (running / fault) instead of relying on the timer alone.
+**Next**
+4. Switch to analog temperature inputs with setpoints and hysteresis, and add sensor-fault alarms.
+5. Add a manual override and an abort or hold input for the suppression release.
+6. Cover the transfer gap with a UPS or battery stage.
+7. Add a generator feedback input (running or fault) instead of trusting the timer alone.
 
-**Longer term**
-8. Add an HMI / SCADA layer for monitoring, trends and alarm management.
+**Later**
+8. Add an HMI/SCADA layer for monitoring, trends and alarm management.
 9. Move repeated logic into Add-On Instructions and use structured tags (UDTs).
 
 ## Standards context
 
-- **IEC 61131-3** defines the ladder diagram language used here.
-- A real deployment would use a listed fire-alarm and suppression control panel (see NFPA 72 for fire alarm systems and NFPA 2001 for clean-agent extinguishing systems) rather than a general-purpose PLC for discharge.
-- Safety functions that need a safety integrity level would use a safety-rated controller (for example Rockwell GuardLogix) and a formal risk assessment.
+- IEC 61131-3 defines the ladder diagram language used in this project.
+- A real installation would use a listed fire-alarm and suppression control panel for the discharge, not a general-purpose PLC. NFPA 72 covers fire alarm systems and NFPA 2001 covers clean-agent extinguishing systems.
+- Any function that needs a safety integrity level would call for a safety-rated controller (such as Rockwell GuardLogix) and a formal risk assessment.
