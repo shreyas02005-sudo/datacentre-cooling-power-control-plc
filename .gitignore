@@ -1,0 +1,18 @@
+# Studio 5000 / RSLogix temporary and backup files
+*.bak
+*.BAK
+*.sem
+*.SEM
+*.WRK
+*.wrk
+Backup_*.ACD
+
+# Office lock files
+~$*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
